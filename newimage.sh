@@ -83,8 +83,8 @@ echo
 echo "For NFS root, something like.."
 echo "LABEL $IMAGENAME"
 echo "     MENU LABEL $IMAGENAME"
-echo "     KERNEL boot/kernel-$IMAGENAME"
-echo "     APPEND initrd=boot/initrd-$IMAGENAME root=nfs:<NFSSERVER>:<IMAGEEXPORT> rw selinux=0 console=tty0 console=ttyS0,115200n8"
+echo "     KERNEL boot/kernel.$IMAGENAME"
+echo "     APPEND initrd=boot/initrd.$IMAGENAME root=nfs:<NFSSERVER>:<IMAGEEXPORT> rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo
 
 
