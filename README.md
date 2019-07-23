@@ -23,6 +23,26 @@ The following scripts are available in the repository:
 - `newimage.sh NAME`: Generates a new CentOS installation within directory `/var/www/netboot/NAME`.
 - `liveosimage.sh NAME`: Create a squashed os image from `/var/www/netboot/NAME`.
 
+### New Image
+
+Create a new image as follows:
+```
+cd /root/flight-images
+bash newimage.sh diskless-example
+```
+
+This will print out a TFTP entry that can be added to `/var/lib/tftpboot/pxelinux.cfg/default` (or a node-specific file) to provide an NFS root for clients.
+
+### Live OS Image
+
+Wrap up an image into an img file as follows:
+```
+cd /root/flight-images
+bash liveosimage.sh diskless-example
+```
+
+This will print out a TFTP entry that can be added to `/var/lib/tftpboot/pxelinux.cfg/default` (or a node-specific file) to serve the image to clients over HTTP or NFS.
+
 # Contributing
 
 Fork the project. Make your feature addition or bug fix. Send a pull
