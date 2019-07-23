@@ -4,7 +4,7 @@
 #
 
 # Install packages
-yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git qemu-img squashfs-tools
+yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git qemu-img squashfs-tools nfs-utils
 
 # Configure network
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -20,7 +20,46 @@ ZONE=trusted
 PEERDNS=no
 EOF
 
-ifup eth0
+systemctl restart network
+
+# DHCP
+cat << EOF > /etc/dhcp/dhcpd.conf
+omapi-port 7911;
+
+default-lease-time 43200;
+max-lease-time 86400;
+ddns-update-style none;
+
+allow booting;
+allow bootp;
+
+option fqdn.no-client-update    on;  # set the "O" and "S" flag bits
+option fqdn.rcode2            255;
+option pxegrub code 150 = text ;
+
+option space PXE;
+option PXE.mtftp-ip    code 1 = ip-address;
+option PXE.mtftp-cport code 2 = unsigned integer 16;
+option PXE.mtftp-sport code 3 = unsigned integer 16;
+option PXE.mtftp-tmout code 4 = unsigned integer 8;
+option PXE.mtftp-delay code 5 = unsigned integer 8;
+option arch code 93 = unsigned integer 16; # RFC4578
+
+# PXE Handoff.
+next-server 10.10.0.1;
+filename "pxelinux.0";
+
+log-facility local7;
+
+subnet 10.10.0.0 netmask 255.255.0.0 {
+  pool
+  {
+    range 10.10.200.100 10.10.200.200;
+  }
+}
+EOF
+
+systemctl start dhcp
 
 # Configure httpd
 mkdir -p /var/www/netboot
@@ -36,6 +75,12 @@ Alias /netboot /var/www/netboot/
 EOF
 systemctl start httpd
 systemctl enable httpd
+
+# NFS setup
+echo '/var/www/netboot  *(rw,no_root_squash)' > /etc/exports
+systemctl start nfs
+systemctl enable nfs
+exportfs -va
 
 # Configure TFTP
 sed -ie "s/^.*disable.*$/\    disable = no/g" /etc/xinetd.d/tftp
