@@ -4,7 +4,7 @@
 #
 
 # Install packages
-yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git
+yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git qemu-img squashfs-tools
 
 # Configure network
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -66,5 +66,4 @@ systemctl restart xinetd
 
 # Download scripts
 git clone https://github.com/openflighthpc/flight-images /root/flight-images
-
 
