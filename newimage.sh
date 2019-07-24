@@ -66,9 +66,9 @@ chroot $IMAGE dracut -N -a livenet -a dmsquash-live -a nfs -a biosdevname -f -v 
 
 # Example check for adding external configuration scripts to image
 if [ ${FLIGHTINSTALL} -eq 1 ]; then
-  mkdir -p $IMAGE/var/lib/flightinstall/bin/
-  cp -v $DIR/flightinstall.sh $IMAGE/var/lib/flightinstall/bin/setup.sh
-  chroot $IMAGE bash /var/lib/flightinstall/bin/setup.sh
+  mkdir -p $IMAGE/var/lib/mycustomscript/bin/
+  cp -v $DIR/mycustomscript.sh $IMAGE/var/lib/mycustomscript/bin/setup.sh
+  chroot $IMAGE bash /var/lib/mycustomscript/bin/setup.sh
 fi
 
 # Tidy it up
