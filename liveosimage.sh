@@ -14,7 +14,7 @@ if [ -z "${IMAGENAME}" ]; then
   echo "Provide an image name" >&2
   exit 1
 elif ! [ -d ${IMAGE} ]; then 
-  echo "Image that exists" >&2
+  echo "Provide an image that exists" >&2
   exit 1
 elif [ -e ${IMAGEFILE} ]; then
   echo "Image file already exists!" >&2
