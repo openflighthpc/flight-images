@@ -11,10 +11,10 @@ LOOP="${STAGINGBASE}/${IMAGENAME}-loop"
 IMAGEFILE=${IMAGE}.img
 
 if [ -z "${IMAGENAME}" ]; then
-  echo "Gimme image name plz" >&2
+  echo "Provide an image name" >&2
   exit 1
 elif ! [ -d ${IMAGE} ]; then 
-  echo "Doofus, gimme image that exists" >&2
+  echo "Image that exists" >&2
   exit 1
 elif [ -e ${IMAGEFILE} ]; then
   echo "Image file already exists!" >&2
@@ -26,7 +26,7 @@ elif ! ( which qemu-img ); then
   echo "Please install qemu-img" >&2 
   exit 1
 elif ! ( which mksquashfs ); then 
-  echo "Plz install mksquashfs" >&2 
+  echo "Please install mksquashfs" >&2 
   exit 1
 fi
 
@@ -57,13 +57,15 @@ echo "Cleaning.."
 rm -rf ${STAGINGDIR}
 
 echo "Done.."
-echo "Imgage: ${IMAGEFILE}"
-echo "Now u prolly want somefin like..."
+echo "Image: ${IMAGEFILE}"
+echo 
+echo "For HTTP PXE boot, something like..."
 echo "LABEL $IMAGENAME-livehttp"
 echo "     MENU LABEL $IMAGENAME"
 echo "     KERNEL boot/kernel-$IMAGENAME"
 echo "     APPEND initrd=boot/initrd-$IMAGENAME root=live:http://<HTTPSERVER>/<HTTPPATH>/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
-echo "Or.."
+echo 
+echo "Or for NFS PXE boot..."
 echo "LABEL $IMAGENAME-livenfs"
 echo "     MENU LABEL $IMAGENAME"
 echo "     KERNEL boot/kernel-$IMAGENAME"

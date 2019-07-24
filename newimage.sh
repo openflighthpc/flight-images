@@ -8,12 +8,18 @@ READONLYROOT=1
 FLIGHTINSTALL=0
 
 if [ -z "${IMAGENAME}" ]; then
-  echo "Gimme image name plz" >&2
+  echo "Provide an image name" >&2
   exit 1
 elif [ -e ${IMAGE} ]; then 
   echo "Image exists" >&2
   exit 1
 fi
+
+read -p "Root password for image: " PASSWORD
+while [[ -z "$PASSWORD" ]] ; do
+    echo "ERROR: Answer cannot be blank"
+    read -p "Root password for image: " PASSWORD
+done
 
 mkdir -p $IMAGE
 
@@ -41,7 +47,7 @@ fi
 #locale and security
 ln -snf /usr/share/zoneinfo/Europe/London $IMAGE/etc/localtime
 echo 'ZONE="Europe/London"' > $IMAGE/etc/sysconfig/clock
-echo 'root:$1$kl5Vk5UX$Kb.TQ73sEm5bVZiqb0v/31' | chpasswd -e -R $IMAGE
+echo "root:$(openssl passwd -1 '$PASSWORD')" | chpasswd -e -R $IMAGE
 
 #prep chroot
 mount -o bind /proc $IMAGE/proc
@@ -51,21 +57,21 @@ mount -o bind /dev  $IMAGE/dev
 
 KERNEL=`chroot $IMAGE rpm -q kernel | tail -n 1 | sed -e 's/^kernel-//g'`
 
-#we gonna use dracut to do networking
+# Use dracut to do networking
 chroot $IMAGE systemctl enable NetworkManager
 chroot $IMAGE systemctl disable network
 chroot $IMAGE systemctl disable kdump
 
 chroot $IMAGE dracut -N -a livenet -a dmsquash-live -a nfs -a biosdevname -f -v /boot/initrd.$IMAGENAME $KERNEL
 
-#kickoff a metalware install on first boot? 
+# Example check for adding external configuration scripts to image
 if [ ${FLIGHTINSTALL} -eq 1 ]; then
   mkdir -p $IMAGE/var/lib/flightinstall/bin/
   cp -v $DIR/flightinstall.sh $IMAGE/var/lib/flightinstall/bin/setup.sh
   chroot $IMAGE bash /var/lib/flightinstall/bin/setup.sh
 fi
 
-#tidy
+# Tidy it up
 chroot $IMAGE cp -v /boot/vmlinuz-$KERNEL /boot/kernel.$IMAGENAME
 chroot $IMAGE yum clean all
 umount -f $IMAGE/proc $IMAGE/sys $IMAGE/run $IMAGE/dev
@@ -75,12 +81,12 @@ sleep 5
 chmod 644 $IMAGE/boot/initrd.$IMAGENAME
 chmod 644 $IMAGE/boot/kernel.$IMAGENAME
 
-echo "Image done.."
-echo "------------"
+echo "Image done."
+echo "-----------"
 echo "Kernel: $IMAGE/boot/kernel.$IMAGENAME"
 echo "InitRD: $IMAGE/boot/initrd.$IMAGENAME"
 echo
-echo "For NFS root, something like.."
+echo "For NFS root, something like..."
 echo "LABEL $IMAGENAME"
 echo "     MENU LABEL $IMAGENAME"
 echo "     KERNEL boot/kernel.$IMAGENAME"
