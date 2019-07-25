@@ -109,8 +109,8 @@ TIMEOUT 100
 TOTALTIMEOUT 1000
 ONTIMEOUT diskless-example
 
-LABEL diskless-example
-    MENU LABEL diskless-example
+LABEL diskless-example-livehttp
+    MENU LABEL diskless-example-livehttp
     KERNEL boot/kernel-diskless-example
     APPEND initrd=boot/initrd-diskless-example root=live:http:http://$IP$EXPORT/diskless-example.img rw selinux=0 console=tty0 console=ttyS0,115200n8
 

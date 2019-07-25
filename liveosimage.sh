@@ -62,13 +62,13 @@ echo "Image: ${IMAGEFILE}"
 echo 
 echo "For HTTP PXE boot, something like..."
 echo "LABEL $IMAGENAME-livehttp"
-echo "     MENU LABEL $IMAGENAME"
+echo "     MENU LABEL $IMAGENAME-livehttp"
 echo "     KERNEL boot/kernel.$IMAGENAME"
 echo "     APPEND initrd=boot/initrd.$IMAGENAME root=live:http://$IP$EXPORT/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo 
 echo "Or for NFS PXE boot..."
 echo "LABEL $IMAGENAME-livenfs"
-echo "     MENU LABEL $IMAGENAME"
+echo "     MENU LABEL $IMAGENAME-livenfs"
 echo "     KERNEL boot/kernel.$IMAGENAME"
 echo "     APPEND initrd=boot/initrd.$IMAGENAME root=live:nfs:$IP:$EXPORT/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo
