@@ -91,7 +91,8 @@ systemctl start httpd
 systemctl enable httpd
 
 # NFS setup
-echo "$IMAGEBASE  *(rw,no_root_squash)" > /etc/exports
+ln -s $IMAGEBASE $EXPORT
+echo "$EXPORT  *(rw,no_root_squash)" > /etc/exports
 systemctl start nfs
 systemctl enable nfs
 exportfs -va
