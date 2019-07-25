@@ -73,7 +73,8 @@ subnet $NETWORK netmask $NETMASK {
 }
 EOF
 
-systemctl start dhcp
+systemctl start dhcpd
+systemctl enable dhcpd
 
 # Configure httpd
 mkdir -p $IMAGEBASE
