@@ -12,9 +12,24 @@ A script is provided to setup the diskless host, which:
 
 (Note: the script presumes the interface eth0 is connected to the internal network for PXE boot)
 
-To run the host setup script:
+Set up the host by curling the script as the root user:
 ```bash
 curl https://raw.githubusercontent.com/openflighthpc/flight-images/master/host_setup.sh |/bin/bash
+```
+
+There are some customisation options to the host setup script which can be overridden at installation time:
+- `INTEFACE`: Default `eth0`, the interface to configure IP settings for and use for DHCP/TFTP/HTTP/NFS.
+- `IP`: Default `10.10.0.1`
+- `NETMASK`: Default `255.255.0.0`
+- `NETWORK`: Default `10.10.0.0`
+- `DHCPRANGE`: Default `10.10.200.10 10.10.200.200`
+- `EXTERNALINTERFACE`: Default eth1, the interface which external/internet facing network is connected to. Used for DNS/external forwarding for clients.
+- `IMAGEBASE`: Default `/export/images`, this is the directory where images will be created and shared over HTTP and NFS.
+- `EXPORT`: Default `/images`, the alias for `$IMAGEBASE` that will be used in HTTP and NFS configuration.
+
+To override any of the above settings, append them before the bash call during host setup:
+```bash
+curl https://raw.githubusercontent.com/openflighthpc/flight-images/master/host_setup.sh |IP=192.168.0.1 NETMASK=255.255.255.0 NETWORK=192.168.0.0 IMAGEBASE=/export/ /bin/bash
 ```
 
 ## Operation

@@ -3,19 +3,31 @@
 # This script presumes the interface eth0 is connected to the internal network for PXE boot
 #
 
+INTERFACE=${INTERFACE:-eth0}
+IP=${IP:-10.10.0.1}
+NETMASK=${NETMASK:-255.255.0.0}
+NETWORK=${NETWORK:-10.10.0.0}
+
+DHCPRANGE=${DHCPRANGE:-10.10.200.10 10.10.200.200}
+
+EXTERNALINTERFACE=${EXTERNALINTERFACE:-eth1}
+
+IMAGEBASE=${IMAGEBASE:-/export/images}
+EXPORT=${EXPORT:-/images}
+
 # Install packages
 yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git qemu-img squashfs-tools nfs-utils
 
 # Configure network
-cat << EOF > /etc/sysconfig/network-scripts/ifcfg-eth0
+cat << EOF > /etc/sysconfig/network-scripts/ifcfg-$INTERFACE
 DEVICE=eth0
 ONBOOT=yes
 TYPE=Ethernet
 DEFROUTE=no
 BOOTPROTO=static
-IPADDR=10.10.0.1
-NETMASK=255.255.0.0
-NETWORK=10.10.0.0
+IPADDR=$IP
+NETMASK=$NETMASK
+NETWORK=$NETWORK
 ZONE=trusted
 PEERDNS=no
 EOF
@@ -29,6 +41,7 @@ omapi-port 7911;
 default-lease-time 43200;
 max-lease-time 86400;
 ddns-update-style none;
+option domain-name-servers $IP;
 
 allow booting;
 allow bootp;
@@ -46,38 +59,39 @@ option PXE.mtftp-delay code 5 = unsigned integer 8;
 option arch code 93 = unsigned integer 16; # RFC4578
 
 # PXE Handoff.
-next-server 10.10.0.1;
+next-server $IP;
 filename "pxelinux.0";
 
 log-facility local7;
 
-subnet 10.10.0.0 netmask 255.255.0.0 {
+subnet $NETWORK netmask $NETMASK {
   pool
   {
-    range 10.10.200.100 10.10.200.200;
+    range $DHCPRANGE;
   }
+  option routers $IP;
 }
 EOF
 
 systemctl start dhcp
 
 # Configure httpd
-mkdir -p /var/www/netboot
-cat << EOF > /etc/httpd/conf.d/netboot.conf
-<Directory /var/www/netboot/>
+mkdir -p $IMAGEBASE
+cat << EOF > /etc/httpd/conf.d/images.conf
+<Directory $IMAGEBASE/>
     Options Indexes MultiViews FollowSymlinks
     AllowOverride None
     Require all granted
     Order Allow,Deny
     Allow from all
 </Directory>
-Alias /netboot /var/www/netboot/
+Alias $EXPORT $IMAGEBASE/
 EOF
 systemctl start httpd
 systemctl enable httpd
 
 # NFS setup
-echo '/var/www/netboot  *(rw,no_root_squash)' > /etc/exports
+echo "$IMAGEBASE  *(rw,no_root_squash)" > /etc/exports
 systemctl start nfs
 systemctl enable nfs
 exportfs -va
@@ -98,7 +112,7 @@ ONTIMEOUT diskless-example
 LABEL diskless-example
     MENU LABEL diskless-example
     KERNEL boot/kernel-diskless-example
-    APPEND initrd=boot/initrd-diskless-example root=live:http:http://10.10.0.1/netboot/diskless-example.img rw selinux=0 console=tty0 console=ttyS0,115200n8
+    APPEND initrd=boot/initrd-diskless-example root=live:http:http://$IP$EXPORT/diskless-example.img rw selinux=0 console=tty0 console=ttyS0,115200n8
 
 LABEL local
     MENU LABEL (local)
@@ -109,6 +123,33 @@ EOF
 systemctl enable xinetd
 systemctl restart xinetd
 
+# DNS & IP Forwarding
+systemctl start dnsmasq
+systemctl enable dnsmasq
+
+systemctl enable firewalld
+systemctl start firewalld
+
+firewall-cmd --set-target=ACCEPT --zone internal --permanent
+firewall-cmd --zone internal --add-interface $INTERFACE --permanent
+
+firewall-cmd --new-zone external --permanent
+firewall-cmd --zone external --add-interface $EXTERNALINTERFACE --permanent
+
+firewall-cmd --reload
+
 # Download scripts
 git clone https://github.com/openflighthpc/flight-images /root/flight-images
+
+# Write config file
+cat << EOF > /root/flight-images/config.sh
+INTERFACE="$INTERFACE"
+IP="$IP"
+NETMASK="$NETMASK"
+NETWORK="$NETWORK"
+DHCPRANGE="$DHCPRANGE"
+EXTERNALINTERFACE="$EXTERNALINTERFACE"
+IMAGEBASE="$IMAGEBASE"
+EXPORT="$EXPORT"
+EOF
 

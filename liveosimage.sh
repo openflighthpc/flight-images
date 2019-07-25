@@ -1,8 +1,9 @@
-IMAGENAME=$1
-IMAGEBASE=/var/www/netboot/
-
-IMAGE=${IMAGEBASE}${IMAGENAME}
+#!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source $DIR/config.sh
+
+IMAGENAME=$1
+IMAGE=${IMAGEBASE}${IMAGENAME}
 
 
 STAGINGBASE="/media/staging"
@@ -62,12 +63,12 @@ echo
 echo "For HTTP PXE boot, something like..."
 echo "LABEL $IMAGENAME-livehttp"
 echo "     MENU LABEL $IMAGENAME"
-echo "     KERNEL boot/kernel-$IMAGENAME"
-echo "     APPEND initrd=boot/initrd-$IMAGENAME root=live:http://<HTTPSERVER>/<HTTPPATH>/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
+echo "     KERNEL boot/kernel.$IMAGENAME"
+echo "     APPEND initrd=boot/initrd.$IMAGENAME root=live:http://$IP$EXPORT/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo 
 echo "Or for NFS PXE boot..."
 echo "LABEL $IMAGENAME-livenfs"
 echo "     MENU LABEL $IMAGENAME"
-echo "     KERNEL boot/kernel-$IMAGENAME"
-echo "     APPEND initrd=boot/initrd-$IMAGENAME root=live:nfs:<NFSERVER>:<NFSEXPORT>/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
+echo "     KERNEL boot/kernel.$IMAGENAME"
+echo "     APPEND initrd=boot/initrd.$IMAGENAME root=live:nfs:$IP:$EXPORT/${IMAGENAME}.img rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo

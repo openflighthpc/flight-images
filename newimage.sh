@@ -1,8 +1,9 @@
-IMAGENAME=$1
-IMAGEBASE=/var/www/netboot/
-
-IMAGE=${IMAGEBASE}${IMAGENAME}
+#!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source $DIR/config.sh
+
+IMAGENAME=$1
+IMAGE=${IMAGEBASE}${IMAGENAME}
 
 READONLYROOT=1
 FLIGHTINSTALL=0
@@ -81,6 +82,9 @@ sleep 5
 chmod 644 $IMAGE/boot/initrd.$IMAGENAME
 chmod 644 $IMAGE/boot/kernel.$IMAGENAME
 
+# Put kernel and initrd in place
+cp $IMAGE/boot/{initrd,kernel}.$IMAGENAME /var/lib/tftpboot/boot/
+
 echo "Image done."
 echo "-----------"
 echo "Kernel: $IMAGE/boot/kernel.$IMAGENAME"
@@ -90,7 +94,7 @@ echo "For NFS root, something like..."
 echo "LABEL $IMAGENAME"
 echo "     MENU LABEL $IMAGENAME"
 echo "     KERNEL boot/kernel.$IMAGENAME"
-echo "     APPEND initrd=boot/initrd.$IMAGENAME root=nfs:<NFSSERVER>:<IMAGEEXPORT> rw selinux=0 console=tty0 console=ttyS0,115200n8"
+echo "     APPEND initrd=boot/initrd.$IMAGENAME root=nfs:$IP:$EXPORT rw selinux=0 console=tty0 console=ttyS0,115200n8"
 echo
 
 
