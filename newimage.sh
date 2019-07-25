@@ -47,7 +47,7 @@ fi
 #locale and security
 ln -snf /usr/share/zoneinfo/Europe/London $IMAGE/etc/localtime
 echo 'ZONE="Europe/London"' > $IMAGE/etc/sysconfig/clock
-echo "root:$(openssl passwd -1 '$PASSWORD')" | chpasswd -e -R $IMAGE
+chroot $IMAGE usermod --password "$(openssl passwd -1 $PASSWORD)" root
 
 #prep chroot
 mount -o bind /proc $IMAGE/proc
