@@ -18,6 +18,10 @@ EXPORT=${EXPORT:-/images}
 # Install packages
 yum -y install vim dhcp tftp xinetd tftp-server syslinux syslinux-tftpboot httpd dnsmasq git qemu-img squashfs-tools nfs-utils
 
+# Disable SELinux
+sed -i 's/^SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+setenforce 0
+
 # Configure network
 cat << EOF > /etc/sysconfig/network-scripts/ifcfg-$INTERFACE
 DEVICE=eth0
@@ -113,8 +117,8 @@ ONTIMEOUT diskless-example
 
 LABEL diskless-example-livehttp
     MENU LABEL diskless-example-livehttp
-    KERNEL boot/kernel-diskless-example
-    APPEND initrd=boot/initrd-diskless-example root=live:http:http://$IP$EXPORT/diskless-example.img rw selinux=0 console=tty0 console=ttyS0,115200n8
+    KERNEL boot/kernel.diskless-example
+    APPEND initrd=boot/initrd.diskless-example root=live:http://$IP$EXPORT/diskless-example.img rw selinux=0 console=tty0 console=ttyS0,115200n8
 
 LABEL local
     MENU LABEL (local)
