@@ -6,7 +6,7 @@ IMAGENAME=$1
 IMAGE=${IMAGEBASE}/${IMAGENAME}
 
 READONLYROOT=1
-FLIGHTINSTALL=0
+CUSTOMSCRIPT=0
 
 if [ -z "${IMAGENAME}" ]; then
   echo "Provide an image name" >&2
@@ -66,7 +66,7 @@ chroot $IMAGE systemctl disable kdump
 chroot $IMAGE dracut -N -a livenet -a dmsquash-live -a nfs -a biosdevname -f -v /boot/initrd.$IMAGENAME $KERNEL
 
 # Example check for adding external configuration scripts to image
-if [ ${FLIGHTINSTALL} -eq 1 ]; then
+if [ ${CUSTOMSCRIPT} -eq 1 ]; then
   mkdir -p $IMAGE/var/lib/mycustomscript/bin/
   cp -v $DIR/mycustomscript.sh $IMAGE/var/lib/mycustomscript/bin/setup.sh
   chroot $IMAGE bash /var/lib/mycustomscript/bin/setup.sh
